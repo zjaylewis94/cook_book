@@ -1246,9 +1246,17 @@ var savedFaves=sGet('faves',null);
 var recipes=RECIPES_INIT.map(function(r){var x=Object.assign({},r);if(savedFaves&&savedFaves.hasOwnProperty(r.id))x.fave=savedFaves[r.id];return x;}).concat(sGet('mine',[]));
 var plan=sGet('plan',{});
 var dayTypes=sGet('daytypes',{});
-// Sized for a ~1 lb/week cut on 6 training days (~250 lb). The Sunday check-in tells you when to move them.
-var DEFAULT_TARGETS={hard:{cal:3500,pro:210,fat:85},mod:{cal:3200,pro:210,fat:85},rest:{cal:2800,pro:210,fat:80}};
+// ~2,850/day average, shaped to training: aims at 0.5–1% bodyweight/week (Helms 2014; ~0.7% held lean mass best,
+// Garthe 2011) without dropping hard days below ~20–25 kcal/kg lean mass (low energy availability).
+// Protein 220 g ≈ 2.3 g/kg lean mass. The Sunday check-in moves these once real weigh-ins exist.
+var DEFAULT_TARGETS={hard:{cal:3100,pro:220,fat:85},mod:{cal:2800,pro:220,fat:80},rest:{cal:2500,pro:220,fat:75}};
 var targets=sGet('targets',JSON.parse(JSON.stringify(DEFAULT_TARGETS)));
+// v2 targets (Oct 2026): phones still on the untouched first defaults move to the new ones; edited targets stay
+if(sGet('targetsVer',1)<2){
+  var OLD={hard:{cal:3500,pro:210,fat:85},mod:{cal:3200,pro:210,fat:85},rest:{cal:2800,pro:210,fat:80}};
+  if(JSON.stringify(targets)===JSON.stringify(OLD)) targets=JSON.parse(JSON.stringify(DEFAULT_TARGETS));
+  sSet('targets',targets);sSet('targetsVer',2);
+}
 // Sun..Sat — Mon Future Soldier (run) · Tue/Thu track with the team · Wed Future Soldier study + lift · Fri off · Sat ruck · Sun off
 var schedule=sGet('sched',['rest','mod','hard','mod','hard','rest','hard']);
 var checkins=sGet('checkins',null);
@@ -1313,8 +1321,8 @@ function trendAdvice(ci){
   if(!base) return 'Need a week between check-ins to read the trend.';
   var wks=(new Date(last.d)-new Date(base.d))/(7*day),rate=(base.w-last.w)/wks;
   var waist=(base.a&&last.a)?' Waist '+(last.a<=base.a?'down ':'up ')+Math.abs(last.a-base.a).toFixed(2)+'&quot;.':'';
-  if(rate<0.5) return '<b>Losing '+rate.toFixed(1)+' lb/week</b> (goal 0.5–2).'+waist+' <button class="btn btn-secondary" style="padding:3px 8px" onclick="nudgeTargets(-150)">−150 cal every day type</button>';
-  if(rate>2) return '<b>Losing '+rate.toFixed(1)+' lb/week</b> — faster than 2. That costs muscle and runs.'+waist+' <button class="btn btn-secondary" style="padding:3px 8px" onclick="nudgeTargets(150)">+150 cal every day type</button>';
+  if(rate<1) return '<b>Losing '+rate.toFixed(1)+' lb/week</b> (goal 1.25–2.5 = 0.5–1% of bodyweight).'+waist+' <button class="btn btn-secondary" style="padding:3px 8px" onclick="nudgeTargets(-150)">−150 cal every day type</button>';
+  if(rate>2.5) return '<b>Losing '+rate.toFixed(1)+' lb/week</b> — faster than 2.5 (1%/week). That costs muscle and runs.'+waist+' <button class="btn btn-secondary" style="padding:3px 8px" onclick="nudgeTargets(150)">+150 cal every day type</button>';
   return '<b>On pace: '+rate.toFixed(1)+' lb/week.</b>'+waist+' Change nothing.';
 }
 function renderCheckin(){
