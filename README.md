@@ -2,12 +2,11 @@
 
 Live: https://zjaylewis94.github.io/cook_book/
 
-One page, three jobs:
+Zach's 12-Week Plan: the cook book he built (Drive `Cook_Book.html`), with training-day targets added.
 
-1. **PLAN**: a Monday–Sunday meal plan graded against daily calorie and protein targets for hard, moderate and rest days. "⚡ Fill empty days" builds the week from your ★ favorites.
-2. **RECIPES**: the catalog. Each recipe has a serving size, batch size, method and settings (air fryer, oven, internal temps), steps and storage. Macros are computed from the ingredients, so you never add anything up.
-3. **SHOP**: the Sunday grocery list for the planned week, by store section, with amounts and how many packages to buy, plus the Sunday batch-prep list.
+- **My Plan**: BCT countdown, his rules (16:8 window 11am–7pm, minimal dairy, 2 caffeine, no spicy), targets for hard / moderate / rest days, per-meal split, and the Sunday weight + waist check-in (Army tape estimate, eat-more / eat-less advice).
+- **Meal Planner**: Sun–Sat grid with four slots (First Meal, Snack, Snack 2, Last Meal). Each day is graded against its day type. "Fill Empty Days" builds the week from his starred recipes and scales portions in half servings; − / + adjusts any meal.
+- **Cookbook** and **Remakes**: his recipes and fast-food copycats.
+- **Sunday Prep**: "Use This Week's Plan" pulls the planner into the grocery list (with amounts) and the cook plan.
 
-**TARGETS** holds the day targets, your usual week, the Sunday weight + waist check-in (with an Army one-site tape estimate) and backup export/import.
-
-Everything is saved in the browser on the device (`localStorage` key `cookbook_v1`). Export a backup now and then.
+Saved in the browser's localStorage under `cb2_*` keys. Starter recipes always load from the file, so edits to them ship; his stars and his own recipes are kept.
