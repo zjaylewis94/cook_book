@@ -604,6 +604,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
       <button class="btn btn-green" onclick="autoFill(false)">⚡ Fill Empty Days</button>
       <button class="btn btn-secondary" onclick="autoFill(true)">↻ Rebuild Week</button>
       <button class="btn btn-secondary" onclick="exportForClaude()">📋 Export for Claude</button>
+      <button class="btn btn-secondary" onclick="backupData()" title="Save your plan, recipes, targets and check-ins to a file">💾 Backup</button>
+      <button class="btn btn-secondary" onclick="restoreData()" title="Load a backup file into this browser">↥ Restore</button>
       <button class="btn btn-secondary" onclick="clearPlan()">Clear Week</button>
     </div>
     <div class="plan-summary-strip">
@@ -1237,6 +1239,33 @@ const SHELVES=[
   {key:'prep',     label:'📦 Meal Prep',   filter:function(r){return r.cat==='prep'||r.cat==='both';}},
   {key:'fave',     label:'⭐ Favorites',    filter:function(r){return r.fave;}},
 ];
+
+/* Backup / restore: this book's keys (cb2_*, plus the old cookbook_v1) as one JSON file. Every book shares
+   one origin, so other books' keys are never touched. */
+function isOwnKey(k){return k.indexOf('cb2_')===0||k==='cookbook_v1';}
+function backupData(){
+  var data={};for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(isOwnKey(k))data[k]=localStorage.getItem(k);}
+  var blob=new Blob([JSON.stringify({book:'cook_book',saved:new Date().toISOString(),data:data},null,1)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='cook_book_backup_'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1500);
+}
+function restoreData(){
+  var inp=document.createElement('input');inp.type='file';inp.accept='application/json,.json';
+  inp.onchange=function(){
+    var f=inp.files[0];if(!f)return;var r=new FileReader();
+    r.onload=function(){
+      var j;try{j=JSON.parse(r.result);}catch(e){j=null;}
+      if(!j||j.book!=='cook_book'||!j.data){alert("That file isn't a Cook Book backup.");return;}
+      if(!confirm('Replace the plan, your recipes, targets and check-ins in this browser with the backup from '+String(j.saved||'').slice(0,10)+'?'))return;
+      var old=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(isOwnKey(k))old.push(k);}
+      old.forEach(function(k){localStorage.removeItem(k);});
+      Object.keys(j.data).forEach(function(k){if(isOwnKey(k))localStorage.setItem(k,j.data[k]);});
+      location.reload();
+    };
+    r.readAsText(f);
+  };
+  inp.click();
+}
 
 /* Saved in localStorage (survives closing the tab). Keys cb2_* — bump the prefix if the saved shape changes. */
 function sGet(k,def){try{var v=localStorage.getItem('cb2_'+k);return v===null?def:JSON.parse(v);}catch(e){return def;}}
